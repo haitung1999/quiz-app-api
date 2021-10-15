@@ -9,7 +9,7 @@ class AuthController {
   async register(req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(422).json({ errors: errors.array() });
     }
 
     const { name, email, password, role } = req.body;
@@ -52,6 +52,46 @@ class AuthController {
       });
     } catch (e) {
       return handleError(res, e, "Cannot register new user.");
+    }
+  }
+
+  async login(req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const { email, password } = req.body;
+
+    try {
+      let user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        const payload = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        };
+
+        //generate token
+        const tokenSign = jwt.sign(payload, process.env.JWT_SECRET, {
+          expiresIn: parseInt(process.env.EXPIRE_TIME),
+        });
+
+        return res.status(200).json({
+          token: "Bearer " + tokenSign,
+          success: true,
+        });
+      }
+      return res
+        .status(400)
+        .json({ message: "Invalid email or password", success: false });
+    } catch (e) {
+      return handleError(res, e, "Cannot login user.");
     }
   }
 }
