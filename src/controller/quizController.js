@@ -29,16 +29,59 @@ class QuizController {
   }
 
   // create quiz
-
   async create(req, res) {
-    const { description, img, choices } = req.body;
-    const newQuiz = { description, img, choices };
+    const { description, img, choices, quizType } = req.body;
+    const newQuiz = { description, img, choices, quizType };
 
     try {
       const quiz = await Quiz.create(newQuiz);
-      return res.status(200).json({ data: quiz, success: true });
+      return res.status(201).json({ data: quiz, success: true });
     } catch (error) {
       return handleError(res, e, "Cannot create quiz");
+    }
+  }
+
+  // update quiz
+  async update(req, res) {
+    const { description, img, choices, quizType } = req.body;
+    const updateQuiz = { description, img, choices, quizType };
+    const _id = req.params.quiz_id;
+
+    try {
+      const quiz = await Quiz.findById(_id).exec();
+
+      if (quiz) {
+        const result = await Quiz.findOneAndUpdate(
+          { _id: _id },
+          { $set: updateQuiz }
+        );
+        return res.status(200).json({ data: result, success: true });
+      }
+
+      return res
+        .status(404)
+        .json({ message: "Quiz not found!", success: false });
+    } catch (error) {
+      return handleError(res, e, "Cannot update quiz");
+    }
+  }
+
+  // delete quiz
+  async delete(req, res) {
+    const _id = req.params.quiz_id;
+    try {
+      const quiz = await Quiz.findById(_id).exec();
+      console.log("quiz", quiz);
+      if (quiz) {
+        const result = await Quiz.deleteOne({ _id: _id });
+        return res.status(200).json({ data: result, success: true });
+      }
+      return res.status(400).json({
+        message: "Quiz not found!",
+        success: false,
+      });
+    } catch (error) {
+      return handleError(res, e, "Cannot delete quiz");
     }
   }
 }
