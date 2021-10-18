@@ -42,7 +42,7 @@ class AuthController {
 
       //generate token
       const tokenSign = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: parseInt(process.env.EXPIRE_TIME),
+        expiresIn: process.env.EXPIRE_TIME,
       });
 
       return res.status(200).json({
@@ -79,7 +79,7 @@ class AuthController {
 
         //generate token
         const tokenSign = jwt.sign(payload, process.env.JWT_SECRET, {
-          expiresIn: parseInt(process.env.EXPIRE_TIME),
+          expiresIn: process.env.EXPIRE_TIME,
         });
 
         return res.status(200).json({

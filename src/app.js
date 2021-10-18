@@ -3,6 +3,8 @@ const app = express();
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const passport = require("passport");
+const passportService = require("./config/passport");
 const path = require("path");
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
@@ -15,6 +17,10 @@ app.use(
 );
 app.use(express.json());
 app.use(morgan("combined"));
+
+// Passport config
+app.use(passport.initialize());
+passportService(passport);
 
 const DB = process.env.DATABASE.replace(
   "<PASSWORD>",
