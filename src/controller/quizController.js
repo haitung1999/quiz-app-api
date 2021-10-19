@@ -10,7 +10,7 @@ class QuizController {
         return res.status(200).json({ data: quizzes, success: true });
       }
     } catch (error) {
-      return handleError(res, e, "Cannot get quizzes");
+      return handleError(res, error, "Cannot get quizzes");
     }
   }
 
@@ -24,7 +24,7 @@ class QuizController {
         return res.status(200).json({ data: quiz, success: true });
       }
     } catch (error) {
-      return handleError(res, e, "Cannot get quiz");
+      return handleError(res, error, "Cannot get quiz");
     }
   }
 
@@ -37,7 +37,7 @@ class QuizController {
       const quiz = await Quiz.create(newQuiz);
       return res.status(201).json({ data: quiz, success: true });
     } catch (error) {
-      return handleError(res, e, "Cannot create quiz");
+      return handleError(res, error, "Cannot create quiz");
     }
   }
 
@@ -53,7 +53,8 @@ class QuizController {
       if (quiz) {
         const result = await Quiz.findOneAndUpdate(
           { _id: _id },
-          { $set: updateQuiz }
+          { $set: updateQuiz },
+          { omitUndefined: true, new: true }
         );
         return res.status(200).json({ data: result, success: true });
       }
@@ -62,7 +63,7 @@ class QuizController {
         .status(404)
         .json({ message: "Quiz not found!", success: false });
     } catch (error) {
-      return handleError(res, e, "Cannot update quiz");
+      return handleError(res, error, "Cannot update quiz");
     }
   }
 
@@ -71,7 +72,7 @@ class QuizController {
     const _id = req.params.quiz_id;
     try {
       const quiz = await Quiz.findById(_id).exec();
-      console.log("quiz", quiz);
+
       if (quiz) {
         const result = await Quiz.deleteOne({ _id: _id });
         return res.status(200).json({ data: result, success: true });
@@ -81,7 +82,7 @@ class QuizController {
         success: false,
       });
     } catch (error) {
-      return handleError(res, e, "Cannot delete quiz");
+      return handleError(res, error, "Cannot delete quiz");
     }
   }
 }

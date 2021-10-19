@@ -5,8 +5,8 @@ const quizRoute = require("./quizRoutes");
 
 const router = express.Router();
 
-router.use("/user", userRoute);
 router.use("/auth", authRoute);
+router.use("/user", userRoute);
 router.use("/quiz", quizRoute);
 
 module.exports = router;
