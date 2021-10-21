@@ -1,5 +1,7 @@
 const express = require("express");
 const userController = require("../controller/userController");
+const authController = require("../controller/authController");
+
 const passport = require("passport");
 
 const router = express.Router();
@@ -7,6 +9,7 @@ const router = express.Router();
 router.get(
   "/",
   passport.authenticate("jwt", { session: false }),
+  authController.isAdmin,
   userController.getAll
 );
 
@@ -25,6 +28,7 @@ router.put(
 router.delete(
   "/:user_id",
   passport.authenticate("jwt", { session: false }),
+  authController.isAdmin,
   userController.delete
 );
 

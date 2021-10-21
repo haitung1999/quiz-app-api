@@ -1,4 +1,5 @@
 const Quiz = require("../models/Quiz");
+const UserChoice = require("../models/UserChoice");
 const { handleError } = require("../utils/handleError");
 
 class QuizController {
@@ -84,6 +85,36 @@ class QuizController {
     } catch (error) {
       return handleError(res, error, "Cannot delete quiz");
     }
+  }
+
+  async submitQuiz(req, res) {
+    const data = req.body.data;
+    const dataResponse = {
+      choices,
+      isCorrect,
+      user_id,
+      quiz_id,
+      user_response_id,
+    };
+
+    const score = 0;
+
+    data.map(async (e) => {
+      const quiz = await Quiz.findById(e.quiz_id).exec();
+      console.log("quiz----", quiz);
+
+      const userChoiceId = e.choices_id;
+      userChoiceId.map((id) => {
+        quiz.choices.map((quizChoices) => {
+          if (id === quizChoices._id) {
+            dataResponse.isCorrect = quizChoices.isCorrect;
+            if (quizChoices.isCorrect === true) {
+              score += quiz.point;
+            }
+          }
+        });
+      });
+    });
   }
 }
 

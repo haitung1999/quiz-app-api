@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const QuizSchema = new Schema({
   description: { type: String, required: true },
   img: String,
-  point: Number,
+  point: { type: Number, default: 10 },
   choices: [
     {
       text: { type: String, required: true },

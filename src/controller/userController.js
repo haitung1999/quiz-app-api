@@ -35,26 +35,6 @@ class UserController {
   }
 
   async changeInfo(req, res) {
-    // const updateUser = { name: req.body.name };
-    // try {
-    //   console.log("request", req);
-    //   const user = await User.findById(req.user.id);
-    //   console.log("user---", user);
-    //   if (user) {
-    //     const result = await User.findOneAndUpdate(
-    //       { _id: req.user.id },
-    //       { $set: updateUser },
-    //       { omitUndefined: true, new: true }
-    //     ).select("-password");
-    //     return res.status(200).json({ data: result, success: true });
-    //   }
-    //   return res.status(401).json({
-    //     msg: "Unauthorized to change infomation of user",
-    //     success: false,
-    //   });
-    // } catch (error) {
-    //   return handleError(res, error, "Cannot change infomation of user");
-    // }
     const updateUser = { name: req.body.name };
     try {
       if (req.headers && req.headers.authorization) {

@@ -2,6 +2,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
+const dotenv = require("dotenv");
+const path = require("path");
+dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 const { handleError } = require("../utils/handleError");
 
@@ -75,6 +78,7 @@ class AuthController {
           id: user.id,
           name: user.name,
           email: user.email,
+          role: user.role,
         };
 
         //generate token
@@ -92,6 +96,32 @@ class AuthController {
         .json({ message: "Invalid email or password", success: false });
     } catch (e) {
       return handleError(res, e, "Cannot login user.");
+    }
+  }
+
+  async isAdmin(req, res, next) {
+    try {
+      if (req.headers && req.headers.authorization) {
+        let authorization = req.headers.authorization.split(" ")[1],
+          decoded;
+        try {
+          decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+        } catch (e) {
+          return res.status(401).send("unauthorized");
+        }
+
+        let userRole = decoded.role;
+        console.log("userRole", userRole);
+        if (userRole === "admin") {
+          return next();
+        }
+        return res.status(403).json({
+          msg: "You do not have permission to perform this action",
+          success: false,
+        });
+      }
+    } catch (error) {
+      return handleError(res, error, "error");
     }
   }
 }
