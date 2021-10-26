@@ -2,6 +2,7 @@ const Quiz = require("../models/Quiz");
 const UserChoice = require("../models/UserChoice");
 const UserResponse = require("../models/UserResponse");
 const { handleError } = require("../utils/handleError");
+const mongoose = require("mongoose");
 
 class QuizController {
   // get all quizzes
@@ -95,45 +96,52 @@ class QuizController {
     let score = 0;
     const dataResponse = [];
 
-    data.map(async (data) => {
-      const quiz = await Quiz.findById(data.quiz_id).exec();
+    await Promise.all(
+      data.map(async (e) => {
+        const userChoiceId = e.choices_id;
+        const quizzesId = e.quiz_id;
+        const answer = {
+          choices: userChoiceId,
+          isCorrect: false,
+          user_id: req.user.id,
+          quiz_id: e.quiz_id,
+        };
 
-      const userChoiceId = data.choices_id;
-      const answer = {
-        choices: userChoiceId,
-        isCorrect: false,
-        user_id: req.user,
-        quiz_id: data.quiz_id,
-      };
+        const quiz = await Quiz.findOne({ _id: quizzesId })
+          .sort({ createdAt: -1 })
+          .exec();
 
-      if (userChoiceId.length > 1) {
-        let checkCorrect = true;
-        userChoiceId.map((userChoiceId) => {
-          quiz.choices.map((quizChoices) => {
-            if (
-              userChoiceId === quizChoices.id &&
-              quizChoices.isCorrect === false
-            ) {
-              checkCorrect = false;
+        if (userChoiceId.length === 1) {
+          quiz.choices.forEach((quizChoices) => {
+            if (userChoiceId[0] === quizChoices.id) {
+              answer.isCorrect = quizChoices.isCorrect;
+              if (quizChoices.isCorrect === false) {
+                return false;
+              } else return (score += quiz.point);
             }
           });
-        });
-        if (checkCorrect) {
-          answer.isCorrect = true;
-          score += quiz.point;
-        }
-      } else {
-        quiz.choices.map((quizChoices) => {
-          if (userChoiceId[0] === quizChoices.id) {
-            answer.isCorrect = quizChoices.isCorrect;
-            if (quizChoices.isCorrect === false) {
-              return false;
-            } else return (score += quiz.point);
+        } else {
+          let checkCorrect = true;
+          userChoiceId.forEach((userChoiceId) => {
+            quiz.choices.forEach((quizChoices) => {
+              if (
+                userChoiceId === quizChoices.id &&
+                quizChoices.isCorrect === false
+              ) {
+                checkCorrect = false;
+              }
+            });
+          });
+
+          if (checkCorrect) {
+            answer.isCorrect = true;
+            score += quiz.point;
           }
-        });
-      }
-      dataResponse.push(answer);
-    });
+        }
+
+        dataResponse.push(answer);
+      })
+    );
 
     const insertDataRes = {
       total_score: score,
@@ -149,10 +157,10 @@ class QuizController {
 
     const userResponse = await UserResponse.create(insertDataRes);
 
-    dataResponse.map(async (answer) => {
+    for (const answer of dataResponse) {
       answer.user_response_id = userResponse.id;
       await UserChoice.create(answer);
-    });
+    }
 
     return res.status(201).json({ data: result, success: true });
   }

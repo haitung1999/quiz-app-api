@@ -37,32 +37,46 @@ class UserController {
   async changeInfo(req, res) {
     const updateUser = { name: req.body.name };
     try {
-      if (req.headers && req.headers.authorization) {
-        let authorization = req.headers.authorization.split(" ")[1],
-          decoded;
-        try {
-          decoded = jwt.verify(authorization, process.env.JWT_SECRET);
-        } catch (e) {
-          return res.status(401).send("unauthorized");
-        }
-        let userId = decoded.id;
+      // if (req.headers && req.headers.authorization) {
+      //   let authorization = req.headers.authorization.split(" ")[1],
+      //     decoded;
+      //   try {
+      //     decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+      //   } catch (e) {
+      //     return res.status(401).send("unauthorized");
+      //   }
+      //   let userId = decoded.id;
 
-        const user = await User.findOne({ _id: userId });
+      //   const user = await User.findOne({ _id: userId });
 
-        if (user) {
-          const result = await User.findOneAndUpdate(
-            { _id: userId },
-            { $set: updateUser },
-            { omitUndefined: true, new: true }
-          ).select("-password");
-          return res.status(200).json({ data: result, success: true });
-        }
-        return res.status(401).json({
-          msg: "Unauthorized to change infomation of user",
-          success: false,
-        });
+      //   if (user) {
+      //     const result = await User.findOneAndUpdate(
+      //       { _id: userId },
+      //       { $set: updateUser },
+      //       { omitUndefined: true, new: true }
+      //     ).select("-password");
+      //     return res.status(200).json({ data: result, success: true });
+      //   }
+      //   return res.status(401).json({
+      //     msg: "Unauthorized to change infomation of user",
+      //     success: false,
+      //   });
+      // }
+      // return res.status(500);
+
+      const user = await User.findOne({ _id: req.user.id });
+      if (user) {
+        const result = await User.findOneAndUpdate(
+          { _id: req.user.id },
+          { $set: updateUser },
+          { omitUndefined: true, new: true }
+        ).select("-password");
+        return res.status(200).json({ data: result, success: true });
       }
-      return res.status(500);
+      return res.status(401).json({
+        msg: "Unauthorized to change infomation of user",
+        success: false,
+      });
     } catch (error) {
       return handleError(res, error, "Cannot change infomation of user");
     }

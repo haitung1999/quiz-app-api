@@ -11,7 +11,7 @@ const UserChoiceSchema = new Schema(
     user_response_id: {
       type: Schema.Types.ObjectId,
       ref: "userResponse",
-      required: true,
+      // required: true,
     },
   },
   { timestamps: true }

@@ -6,7 +6,7 @@ const UserResponseSchema = new Schema(
   {
     total_score: Number,
     total_quiz: Number,
-    user_id: { type: Types.ObjectId, ref: "user" },
+    user_id: { type: Schema.Types.ObjectId, ref: "user" },
   },
   { timestamps: true }
 );
